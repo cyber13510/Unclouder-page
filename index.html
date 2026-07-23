@@ -3,10 +3,633 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Unclouder</title>
+  <meta name="description" content="Unclouder — 인디 게임 개발. 던전.txt, 색연필의 모험을 만나보세요." />
+  <meta name="theme-color" content="#0b0f1a" />
+  <title>Unclouder — Indie Games</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0b0f1a;
+      --bg-elevated: #12182a;
+      --bg-card: rgba(22, 30, 52, 0.72);
+      --border: rgba(148, 163, 184, 0.14);
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --accent: #8b5cf6;
+      --accent-2: #22d3ee;
+      --accent-soft: rgba(139, 92, 246, 0.18);
+      --dungeon: #7c5cff;
+      --crayon: #f59e0b;
+      --radius: 22px;
+      --shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+      --max: 1080px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: "IBM Plex Sans KR", "Outfit", system-ui, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      min-height: 100vh;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Ambient background */
+    .bg-glow {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background:
+        radial-gradient(900px 500px at 10% -10%, rgba(139, 92, 246, 0.28), transparent 55%),
+        radial-gradient(800px 480px at 90% 10%, rgba(34, 211, 238, 0.16), transparent 50%),
+        radial-gradient(700px 500px at 50% 100%, rgba(245, 158, 11, 0.10), transparent 55%),
+        var(--bg);
+    }
+
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background-image:
+        linear-gradient(rgba(148, 163, 184, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
+      pointer-events: none;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .wrap {
+      width: min(var(--max), calc(100% - 2rem));
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(16px);
+      background: rgba(11, 15, 26, 0.72);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.9rem 0;
+      gap: 1rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      font-family: Outfit, sans-serif;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .logo-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 8px 24px rgba(139, 92, 246, 0.35);
+      font-size: 1.05rem;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      font-size: 0.92rem;
+      font-weight: 500;
+      padding: 0.45rem 0.85rem;
+      border-radius: 999px;
+      transition: 0.2s ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    /* Hero */
+    .hero {
+      padding: 4.5rem 0 3rem;
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.4rem 0.9rem;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      border: 1px solid rgba(139, 92, 246, 0.35);
+      color: #ddd6fe;
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+    }
+
+    .hero h1 {
+      font-family: Outfit, sans-serif;
+      font-size: clamp(2.2rem, 6vw, 3.6rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.12;
+      margin-bottom: 1rem;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(120deg, #c4b5fd 0%, #67e8f9 50%, #fcd34d 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero p {
+      max-width: 36rem;
+      margin: 0 auto 1.8rem;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.85rem 1.25rem;
+      border-radius: 14px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+      transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .btn:hover { transform: translateY(-2px); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #7c3aed, #2563eb);
+      color: white;
+      box-shadow: 0 12px 30px rgba(124, 58, 237, 0.35);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 16px 36px rgba(124, 58, 237, 0.45);
+    }
+
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: var(--border);
+      color: var(--text);
+    }
+
+    .btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    /* Sections */
+    section {
+      padding: 2.5rem 0 1rem;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.4rem;
+      flex-wrap: wrap;
+    }
+
+    .section-head h2 {
+      font-family: Outfit, sans-serif;
+      font-size: 1.55rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+
+    .section-head p {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    /* App cards */
+    .app-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+    }
+
+    @media (max-width: 780px) {
+      .app-grid { grid-template-columns: 1fr; }
+    }
+
+    .app-card {
+      position: relative;
+      border-radius: var(--radius);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .app-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(167, 139, 250, 0.35);
+    }
+
+    .app-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 4px;
+    }
+
+    .app-card.dungeon::before {
+      background: linear-gradient(90deg, #7c5cff, #22d3ee);
+    }
+
+    .app-card.crayon::before {
+      background: linear-gradient(90deg, #f59e0b, #fb7185);
+    }
+
+    .app-card-inner {
+      padding: 1.4rem 1.4rem 1.25rem;
+      display: grid;
+      gap: 1.1rem;
+    }
+
+    .app-top {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+
+    .app-icon {
+      width: 76px;
+      height: 76px;
+      border-radius: 18px;
+      object-fit: cover;
+      flex-shrink: 0;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: #1e293b;
+    }
+
+    .app-meta h3 {
+      font-family: Outfit, sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.2rem;
+    }
+
+    .app-meta .tagline {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 0.55rem;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+
+    .chip {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.22rem 0.55rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      color: #cbd5e1;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .chip.star {
+      color: #fde68a;
+      background: rgba(245, 158, 11, 0.12);
+      border-color: rgba(245, 158, 11, 0.25);
+    }
+
+    .app-desc {
+      color: #cbd5e1;
+      font-size: 0.92rem;
+      line-height: 1.65;
+    }
+
+    .app-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+
+    .btn-play {
+      background: #fff;
+      color: #0f172a;
+      font-weight: 700;
+    }
+
+    .btn-play:hover {
+      box-shadow: 0 10px 24px rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-play svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Blog promo */
+    .blog-banner {
+      margin-top: 2.5rem;
+      margin-bottom: 1rem;
+      border-radius: calc(var(--radius) + 4px);
+      border: 1px solid rgba(34, 211, 238, 0.2);
+      background:
+        linear-gradient(135deg, rgba(34, 211, 238, 0.08), rgba(139, 92, 246, 0.12)),
+        var(--bg-elevated);
+      padding: 1.6rem 1.5rem;
+      display: grid;
+      grid-template-columns: 1.4fr auto;
+      gap: 1.2rem;
+      align-items: center;
+      box-shadow: var(--shadow);
+    }
+
+    @media (max-width: 700px) {
+      .blog-banner {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+      .blog-banner .btn { width: 100%; }
+    }
+
+    .blog-banner h2 {
+      font-family: Outfit, sans-serif;
+      font-size: 1.35rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .blog-banner p {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    /* About */
+    .about {
+      margin: 2rem 0 3rem;
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .about h2 {
+      font-family: Outfit, sans-serif;
+      font-size: 1.25rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .about p {
+      color: var(--muted);
+      max-width: 48rem;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 1.6rem 0 2.2rem;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .footer-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1.25rem;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.85rem;
+    }
+
+    .footer-links a:hover { color: var(--text); }
+
+    /* Subtle float animation */
+    @keyframes floaty {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    .float-soft { animation: floaty 5.5s ease-in-out infinite; }
+  </style>
 </head>
 <body>
-  <p>Developer site for app-ads.txt</p>
-  <p><a href="./app-ads.txt">app-ads.txt</a></p>
+  <div class="bg-glow" aria-hidden="true"></div>
+  <div class="bg-grid" aria-hidden="true"></div>
+
+  <header>
+    <div class="wrap nav">
+      <a class="brand" href="#top">
+        <span class="logo-mark" aria-hidden="true">☁</span>
+        <span>Unclouder</span>
+      </a>
+      <nav class="nav-links" aria-label="주요 메뉴">
+        <a href="#games">게임</a>
+        <a href="#blog">블로그</a>
+        <a href="#about">소개</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero wrap">
+      <div class="badge">☁ Indie Game Studio · Korea</div>
+      <h1>작은 팀, 큰 상상의<br /><span>Unclouder</span></h1>
+      <p>
+        텍스트 로그라이크부터 색칠 어드벤처까지.
+        플레이어의 선택이 빛나는 인디 게임을 만듭니다.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#games">게임 보러가기</a>
+        <a class="btn btn-ghost" href="https://blog.naver.com/cyber13510" target="_blank" rel="noopener noreferrer">
+          개발 블로그 ↗
+        </a>
+      </div>
+    </section>
+
+    <section id="games" class="wrap">
+      <div class="section-head">
+        <div>
+          <h2>Games</h2>
+          <p>Google Play에서 바로 플레이할 수 있어요.</p>
+        </div>
+      </div>
+
+      <div class="app-grid">
+        <!-- 던전.txt -->
+        <article class="app-card dungeon">
+          <div class="app-card-inner">
+            <div class="app-top">
+              <img
+                class="app-icon float-soft"
+                src="https://play-lh.googleusercontent.com/cVWNsEDBGzvIMhQ8YtBoo1yK8vc324jmPQqLGKCfHejXhAujBq-bdDXcJbbhNntFKeH9dovlzXan6Uqz9lJF5A=s240-rw"
+                alt="던전.txt 아이콘"
+                width="76"
+                height="76"
+                loading="lazy"
+              />
+              <div class="app-meta">
+                <h3>던전.txt</h3>
+                <p class="tagline">텍스트 덱빌딩 로그라이크</p>
+                <div class="chips">
+                  <span class="chip star">★ 4.4</span>
+                  <span class="chip">전략</span>
+                  <span class="chip">로그라이크</span>
+                  <span class="chip">시너지</span>
+                </div>
+              </div>
+            </div>
+            <p class="app-desc">
+              최고의 시너지를 찾아 당신만의 전략을 완성하세요.
+              수백 종의 패시브와 아이템을 조합해 던전을 정복하는
+              깊이 있는 텍스트 덱빌딩 로그라이크입니다.
+            </p>
+            <div class="app-actions">
+              <a
+                class="btn btn-play"
+                href="https://play.google.com/store/apps/details?id=com.textroguelike.app"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M3.6 2.9c-.3.2-.5.5-.5.9v16.4c0 .4.2.7.5.9l9.8-9.1L3.6 2.9zm11.3 6.5-2.2 2 2.2 2 4.7-2.7c.7-.4.7-1.4 0-1.8l-4.7-2.7zM4.1 21.5l9.1-5.3-2.3-2.1-6.8 7.4zm8.9-9.2 2.3-2.1-9.1-5.3 6.8 7.4z"/>
+                </svg>
+                Google Play
+              </a>
+            </div>
+          </div>
+        </article>
+
+        <!-- 색연필의 모험 -->
+        <article class="app-card crayon">
+          <div class="app-card-inner">
+            <div class="app-top">
+              <img
+                class="app-icon float-soft"
+                style="animation-delay: -2s"
+                src="https://play-lh.googleusercontent.com/NZs8wLdoIReOkEiLy41i2iT5Hhqr-TDhKfF0R5jzHH2PxUoPahCwk9065HU4t0UckoAM6On2NG8-xq5yrLDa-qY=s240-rw"
+                alt="색연필의 모험 아이콘"
+                width="76"
+                height="76"
+                loading="lazy"
+              />
+              <div class="app-meta">
+                <h3>색연필의 모험</h3>
+                <p class="tagline">흑백 세상을 다시 칠하는 어드벤처</p>
+                <div class="chips">
+                  <span class="chip star">★ 4.4</span>
+                  <span class="chip">어드벤처</span>
+                  <span class="chip">색칠</span>
+                  <span class="chip">퍼즐</span>
+                </div>
+              </div>
+            </div>
+            <p class="app-desc">
+              마법사가 세상을 흑백으로 만들어 버렸습니다.
+              색연필이 되어 세상을 다시 칠하고, 타이밍과 상상력으로
+              색을 되찾는 신선한 색칠 어드벤처입니다.
+            </p>
+            <div class="app-actions">
+              <a
+                class="btn btn-play"
+                href="https://play.google.com/store/apps/details?id=com.SkillLand.colorize&hl=ko"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M3.6 2.9c-.3.2-.5.5-.5.9v16.4c0 .4.2.7.5.9l9.8-9.1L3.6 2.9zm11.3 6.5-2.2 2 2.2 2 4.7-2.7c.7-.4.7-1.4 0-1.8l-4.7-2.7zM4.1 21.5l9.1-5.3-2.3-2.1-6.8 7.4zm8.9-9.2 2.3-2.1-9.1-5.3 6.8 7.4z"/>
+                </svg>
+                Google Play
+              </a>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div id="blog" class="blog-banner">
+        <div>
+          <h2>개발 블로그</h2>
+          <p>
+            제작 과정, 업데이트 소식, 인디 개발 이야기를 네이버 블로그에서 공유합니다.
+          </p>
+        </div>
+        <a class="btn btn-primary" href="https://blog.naver.com/cyber13510" target="_blank" rel="noopener noreferrer">
+          blog.naver.com/cyber13510 ↗
+        </a>
+      </div>
+    </section>
+
+    <section id="about" class="wrap">
+      <div class="about">
+        <h2>About Unclouder</h2>
+        <p>
+          Unclouder는 플레이어의 선택이 게임플레이의 중심이 되는 작품을 만듭니다.
+          전략적인 빌드 크래프팅, 감각적인 연출, 부담 없는 스토리텔링을 추구하며
+          모바일에서 오래 기억되는 경험을 목표로 합니다.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer-row">
+      <div>© <span id="y"></span> Unclouder. All rights reserved.</div>
+      <div class="footer-links">
+        <a href="https://blog.naver.com/cyber13510" target="_blank" rel="noopener noreferrer">Blog</a>
+        <a href="https://play.google.com/store/apps/details?id=com.textroguelike.app" target="_blank" rel="noopener noreferrer">던전.txt</a>
+        <a href="https://play.google.com/store/apps/details?id=com.SkillLand.colorize&hl=ko" target="_blank" rel="noopener noreferrer">색연필의 모험</a>
+        <a href="./app-ads.txt">app-ads.txt</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById("y").textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
